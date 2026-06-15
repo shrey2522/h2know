@@ -1,6 +1,6 @@
 import { kvGet, kvSet } from "./kv";
 import { calculateStreak } from "./streak";
-import { mergeSubjectMarks } from "./subjects";
+import { mergeSubjectMarks, normalizeStreamData } from "./subjects";
 import { createSampleData, SAMPLE_USER_ID } from "./sampleData";
 import type {
   AIInsight,
@@ -19,7 +19,7 @@ async function loadPartial<T>(userId: string, suffix: string, fallback: T): Prom
 }
 
 export async function loadUserData(userId: string): Promise<UserData> {
-  const [streamData, goals, logs, streak, timetable, lastInsight] =
+  const [rawStreamData, goals, logs, streak, timetable, lastInsight] =
     await Promise.all([
       loadPartial(userId, "streamData", DEFAULT_STREAM_DATA),
       loadPartial(userId, "goals", DEFAULT_GOALS),
@@ -28,6 +28,8 @@ export async function loadUserData(userId: string): Promise<UserData> {
       kvGet<Timetable>(userId, "timetable"),
       kvGet<AIInsight>(userId, "lastInsight"),
     ]);
+
+  const streamData = normalizeStreamData(rawStreamData);
 
   const hasAnyData =
     logs.length > 0 ||
@@ -54,7 +56,7 @@ export async function loadUserData(userId: string): Promise<UserData> {
 
 export async function saveUserData(userId: string, data: UserData): Promise<void> {
   await Promise.all([
-    kvSet(userId, "streamData", data.streamData),
+    kvSet(userId, "streamData", normalizeStreamData(data.streamData)),
     kvSet(userId, "goals", data.goals),
     kvSet(userId, "logs", data.logs),
     kvSet(userId, "streak", data.streak),
@@ -71,10 +73,10 @@ export async function updateStreamData(
   userId: string,
   streamData: StreamData
 ): Promise<StreamData> {
-  const merged: StreamData = {
-    stream: streamData.stream,
-    subjects: mergeSubjectMarks(streamData.stream, streamData.subjects),
-  };
+  const merged = normalizeStreamData({
+    ...streamData,
+    subjects: mergeSubjectMarks(streamData, streamData.subjects),
+  });
   await kvSet(userId, "streamData", merged);
   return merged;
 }

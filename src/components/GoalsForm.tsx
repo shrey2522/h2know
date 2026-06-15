@@ -65,6 +65,16 @@ export default function GoalsForm({ userId, goals, onUpdate }: GoalsFormProps) {
             onChange={(e) => update({ shortTermGoal: e.target.value })}
           />
         </div>
+        {goals.shortTermGoal.trim() && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-amber-700">
+              Current focus
+            </p>
+            <p className="text-sm font-semibold text-amber-900">
+              {goals.shortTermGoal}
+            </p>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label">Daily Study Goal (hours)</label>

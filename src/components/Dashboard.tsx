@@ -111,8 +111,7 @@ export default function Dashboard({ userId }: DashboardProps) {
         <MarksChart subjects={data.streamData.subjects} />
         <AIInsights
           userId={userId}
-          stream={data.streamData.stream}
-          subjects={data.streamData.subjects}
+          streamData={data.streamData}
           studyLogs={data.logs}
           goals={data.goals}
           lastInsight={data.lastInsight}

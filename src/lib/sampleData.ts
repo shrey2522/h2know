@@ -1,8 +1,27 @@
 import type { UserData } from "./types";
-import { getSubjectsForStream } from "./subjects";
+import { getSubjectsForConfig } from "./subjects";
 
 export function createSampleData(): UserData {
-  const subjects = getSubjectsForStream("Science").map((s) => {
+  const streamData = {
+    educationLevel: "Class 12" as const,
+    stream: "Science" as const,
+    degreeType: "B.Sc",
+    btechBranch: "CSE" as const,
+    professionalProgram: "CA" as const,
+    professionalLevel: "Foundation" as const,
+    researchArea: "",
+    subjects: getSubjectsForConfig({
+      educationLevel: "Class 12",
+      stream: "Science",
+      degreeType: "B.Sc",
+      btechBranch: "CSE",
+      professionalProgram: "CA",
+      professionalLevel: "Foundation",
+      researchArea: "",
+    }),
+  };
+
+  const subjects = streamData.subjects.map((s) => {
     const marksMap: Record<string, number> = {
       Physics: 78,
       Chemistry: 82,
@@ -19,7 +38,7 @@ export function createSampleData(): UserData {
   const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
   return {
-    streamData: { stream: "Science", subjects },
+    streamData: { ...streamData, subjects },
     goals: {
       careerGoal: "Software Engineer",
       shortTermGoal: "Score 90%+ in Mathematics this term",

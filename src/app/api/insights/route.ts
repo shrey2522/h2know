@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 interface InsightRequest {
   userId: string;
+  educationLabel: string;
   stream: Stream;
   subjects: SubjectMark[];
   studyLogs: StudyLog[];
@@ -35,11 +36,13 @@ function buildPrompt(payload: InsightRequest): string {
           .join("; ")
       : "No study logs in the last 7 days";
 
-  return `You are a friendly academic advisor for an Indian high school student.
+  return `You are a friendly academic advisor for an Indian student.
 
-Student's stream: ${payload.stream}
+Education level & program: ${payload.educationLabel}
+Student's stream (if applicable): ${payload.stream}
 Subject marks: ${marksText}
 Daily study goal: ${payload.goals.dailyStudyGoal} hours
+Short-term goal: ${payload.goals.shortTermGoal || "Not specified"}
 Recent study logs (last 7 days): ${logsSummary}
 Career goal stated by student: ${payload.goals.careerGoal || "Not specified"}
 

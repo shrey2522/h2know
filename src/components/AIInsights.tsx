@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { AIInsight, Goals, Stream, StudyLog, SubjectMark } from "@/lib/types";
+import type { AIInsight, Goals, StreamData, StudyLog } from "@/lib/types";
+import { getEducationLabel } from "@/lib/subjects";
 
 interface AIInsightsProps {
   userId: string;
-  stream: Stream;
-  subjects: SubjectMark[];
+  streamData: StreamData;
   studyLogs: StudyLog[];
   goals: Goals;
   lastInsight: AIInsight | null;
@@ -15,8 +15,7 @@ interface AIInsightsProps {
 
 export default function AIInsights({
   userId,
-  stream,
-  subjects,
+  streamData,
   studyLogs,
   goals,
   lastInsight,
@@ -34,8 +33,9 @@ export default function AIInsights({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
-          stream,
-          subjects,
+          educationLabel: getEducationLabel(streamData),
+          stream: streamData.stream,
+          subjects: streamData.subjects,
           studyLogs,
           goals,
         }),
