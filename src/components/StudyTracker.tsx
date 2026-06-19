@@ -313,7 +313,7 @@ export default function StudyTracker({
             <input
               type="number"
               min={0}
-              step={0.25}
+              step={0.1}
               className="input"
               value={actualHours}
               onChange={(e) => setActualHours(Number(e.target.value) || 0)}

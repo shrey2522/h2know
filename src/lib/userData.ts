@@ -1,7 +1,6 @@
 import { kvGet, kvSet } from "./kv";
 import { calculateStreak } from "./streak";
 import { mergeSubjectMarks, normalizeStreamData } from "./subjects";
-import { createSampleData, SAMPLE_USER_ID } from "./sampleData";
 import type {
   AIInsight,
   Goals,
@@ -30,17 +29,6 @@ export async function loadUserData(userId: string): Promise<UserData> {
     ]);
 
   const streamData = normalizeStreamData(rawStreamData);
-
-  const hasAnyData =
-    logs.length > 0 ||
-    goals.careerGoal !== "" ||
-    streamData.subjects.some((s) => s.marks > 0);
-
-  if (!hasAnyData && userId === SAMPLE_USER_ID) {
-    const sample = createSampleData();
-    await saveUserData(userId, sample);
-    return sample;
-  }
 
   const computedStreak = calculateStreak(logs);
 
