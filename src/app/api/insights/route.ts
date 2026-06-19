@@ -96,6 +96,30 @@ async function respondWithFallback(body: InsightRequest, message: string) {
   });
 }
 
+const GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.0-flash-lite",
+  "gemini-2.0-flash",
+] as const;
+
+async function generateWithGemini(apiKey: string, prompt: string): Promise<string> {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  let lastError: unknown;
+
+  for (const modelName of GEMINI_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    } catch (error) {
+      lastError = error;
+      console.error(`[insights] ${modelName} failed:`, error);
+    }
+  }
+
+  throw lastError ?? new Error("All Gemini models failed");
+}
+
 export async function POST(request: Request) {
   let body: InsightRequest;
 
@@ -116,10 +140,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent(buildPrompt(body));
-    const text = result.response.text();
+    const prompt = buildPrompt(body);
+    const text = await generateWithGemini(apiKey, prompt);
     const parsed = parseGeminiJson(text);
 
     if (!parsed) {
@@ -136,7 +158,8 @@ export async function POST(request: Request) {
 
     await saveInsight(body.userId, insight);
     return NextResponse.json(insight);
-  } catch {
+  } catch (error) {
+    console.error("[insights] Gemini request failed:", error);
     return respondWithFallback(
       body,
       "AI insights temporarily unavailable — try again later."
